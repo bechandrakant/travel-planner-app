@@ -1,0 +1,17 @@
+* {
+  margin: 10px;
+  padding: 10px;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+#entryHolder {
+  background-color: antiquewhite;
+  width: 400px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
