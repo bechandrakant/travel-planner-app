@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Weather Journal App</title>
+  <link rel="stylesheet" href="./../styles/styles.css">
+</head>
+
+<body>
+  <header>
+    <nav>
+      <h1>Travel Planner App</h1>
+    </nav>
+  </header>
+  <main>
+    <section class="user-input">
+      <input type="text" placeholder="enter city name here" id="city-name" />
+      <input type="text" placeholder="enter date in format (dd/mm/yyyy)" id="trip-date"></input>
+      <button id="generate">Get trip details</button>
+    </section>
+    <section class="trip-details">
+      <div id="entryHolder">
+        <div id="temp"></div>
+        <div id="date"></div>
+        <div id="content"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="./../js/app.js"></script>
+
+</body>
+
+</html>
