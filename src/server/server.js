@@ -2,16 +2,13 @@
 const dotenv = require('dotenv');
 dotenv.config();
 
-// Setup empty JS object to act as endpoint for all routes
-let projectData = [];
-
 // Express to run server and routes
 const express = require('express');
 
 // Start up an instance of app
 const app = express();
 
-// Fetch api
+// Enable Fetch api
 const fetch = require("node-fetch");
 
 /* Dependencies */
@@ -57,39 +54,33 @@ app.post('/trip', (req, res) => {
     'date': req.body.date
   }
   console.log(inputData)
+
+  // Call Geonames API
   const geoNamesResult = getGeonamesData(inputData);
   console.log(":::::::: Geonames API Call Result :::::::::::");
   console.log(geoNamesResult);
-
+  
+  // // Call Darksky API
+  // const darkskyResult = getDarkskyData(geoNamesResult, inputData)
+  // console.log(":::::::: Darksky API Call Result :::::::::::");
+  // console.log(darkskyResult);
+  
+  // TODO: Call Pixabay API
+  
+  // TODO: Return response
+  // Response format
+  // const expectedResponse = {
+  //   'img_url': '',
+  //   'destination': 'city,' + 'country',
+  //   'date': userDate,
+  //   'weather': {
+  //     'high': 23,
+  //     'low': 12,
+  //     'summary': 'mostly clody'
+  //   }
+  // }
 });
 
-// Response format
-// const expectedResponse = {
-//   'img_url': '',
-//   'destination': 'city,' + 'country',
-//   'date': userDate,
-//   'weather': {
-//     'high': 23,
-//     'low': 12,
-//     'summary': 'mostly clody'
-//   }
-// }
-
-// Callback function to complete POST '/planTrip'
-function sendTripData(req, res) {
-  console.log(':::::::::: Data reached backend ::::::::')
-  const inputData = {
-    'destination': req.body.destination,
-    'date': req.body.date
-  }
-  console.log(inputData)
-  const geoNamesResult = getGeonamesData(inputData);
-  console.log(":::::::: Geonames API Call Result :::::::::::");
-  console.log(geoNamesResult);
-
-  res.send(expectedResponse)
-  logData()
-}
 
 /* Function to GET latitude, longitude and country data from genomes API */
 const getGeonamesData = async function (inputData) {
@@ -109,20 +100,62 @@ const getGeonamesData = async function (inputData) {
     }
     console.log(":::::::: Formatted Data :::::::::::");
     console.log(formattedData);
+
+    // Call Darksky API
+    const darkskyResult = getDarkskyData(formattedData, inputData)
+    console.log(":::::::: Darksky API Call Result :::::::::::");
+    console.log(darkskyResult);
+
     return formattedData;
   } catch (error) {
-    // console.log("error", error);
+    console.log("error", error);
     return null;
   }
 }
 
-function logData() {
-  console.log("Data sent successfully to client: \n");
-  projectData.forEach(data => {
-    console.log('{ temperature: ' + data.temperature +
-      ', date: ' + data.date +
-      ', userResponse: ' + data.userResponse + ' }');
-  })
+/* Function to GET weather {high, low, summary} data from Darksky API */
+const getDarkskyData = async function (geonamesResult, inputData) {
+  const splitDate = inputData.date.split('/');
+  const day = splitDate[0];
+  const month = splitDate[1];
+  const year = splitDate[2];
+  const timeInSeconds = Math.round(new Date(year, month, day).getTime() / 1000);
+  const completeUrl = 'https://api.darksky.net/forecast/' + darkskyKey + '/' + geonamesResult.latitude + ',' + geonamesResult.longitude + ',' + timeInSeconds + '?units=si';
+  console.log(":::::::::::: URL ::::::::::::::");
+  console.log(completeUrl)
+
+  const res = await fetch(completeUrl);
+  try {
+    const newData = await res.json();
+    console.log(":::::::: Received Data from Darksky API :::::::::::");
+    console.log(newData);
+    const dailyData = newData.daily.data[0];
+    console.log(dailyData);
+    // filter data in JSON
+    let formattedData = {
+      'high': dailyData.temperatureHigh,
+      'low': dailyData.temperatureLow,
+      'summary': dailyData.summary
+    }
+
+    // If summary unavailable, custom message based on temperature
+    if (formattedData.summary == undefined) {
+      console.log("No option")
+      if (formattedData.low < 10)
+        formattedData.summary = "Cold weather"
+      else if (formattedData.low < 20)
+        formattedData.summary = "Pleasant weather"
+      else 
+        formattedData.summary = "Sunny weather"
+    }
+    console.log(":::::::: Formatted Data :::::::::::");
+    console.log(formattedData);
+    return formattedData;
+  } catch (error) {
+    console.log("error", error);
+    return null;
+  }
 }
+
 
 // module.exports = getData;
