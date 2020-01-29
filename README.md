@@ -1,4 +1,4 @@
-# weather-journal-app
+# Travel Planner App
 App fetches weather data from [OpenWeatherMap Api](https://openweathermap.org/) using zipcode.
 
 ## run

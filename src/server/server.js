@@ -1,3 +1,7 @@
+// Dotenv
+const dotenv = require('dotenv');
+dotenv.config();
+
 // Setup empty JS object to act as endpoint for all routes
 let projectData = [];
 
@@ -6,6 +10,9 @@ const express = require('express');
 
 // Start up an instance of app
 const app = express();
+
+// Fetch api
+const fetch = require("node-fetch");
 
 /* Dependencies */
 const bodyParser = require('body-parser');
@@ -20,7 +27,7 @@ const cors = require('cors');
 app.use(cors());
 
 // Initialize the main project folder
-app.use(express.static('../public'));
+app.use(express.static('dist'));
 
 const port = 8000;
 
@@ -32,13 +39,81 @@ function callback() {
   console.log("listening on port " + port);
 }
 
-// Initialize all route with a callback function
-app.get('/all', getData);
+// API credentials
+const geonamesUsername = process.env.GEONAMES_USERNAME
+const darkskyKey = process.env.DARKSKY_KEY
+const pixabayKey = process.env.PIXABAY_KEY
 
-// Callback function to complete GET '/all'
-function getData(req, res) {
-  res.send(projectData);
+app.get('/', function (req, res) {
+  console.log('I am listening')
+  res.send('Hello Man I am alive')
+})
+
+// Initialize trip route with a callback function
+app.post('/trip', (req, res) => {
+  console.log(':::::::::: Data reached backend ::::::::')
+  const inputData = {
+    'destination': req.body.destination,
+    'date': req.body.date
+  }
+  console.log(inputData)
+  const geoNamesResult = getGeonamesData(inputData);
+  console.log(":::::::: Geonames API Call Result :::::::::::");
+  console.log(geoNamesResult);
+
+});
+
+// Response format
+// const expectedResponse = {
+//   'img_url': '',
+//   'destination': 'city,' + 'country',
+//   'date': userDate,
+//   'weather': {
+//     'high': 23,
+//     'low': 12,
+//     'summary': 'mostly clody'
+//   }
+// }
+
+// Callback function to complete POST '/planTrip'
+function sendTripData(req, res) {
+  console.log(':::::::::: Data reached backend ::::::::')
+  const inputData = {
+    'destination': req.body.destination,
+    'date': req.body.date
+  }
+  console.log(inputData)
+  const geoNamesResult = getGeonamesData(inputData);
+  console.log(":::::::: Geonames API Call Result :::::::::::");
+  console.log(geoNamesResult);
+
+  res.send(expectedResponse)
   logData()
+}
+
+/* Function to GET latitude, longitude and country data from genomes API */
+const getGeonamesData = async function (inputData) {
+  const completeUrl = 'http://api.geonames.org/searchJSON?name_startsWith=' + inputData.destination + '&maxRows=1&username=' + geonamesUsername;
+  const res = await fetch(completeUrl);
+  try {
+    const newData = await res.json();
+    console.log(":::::::: Received Data from Geonames API :::::::::::");
+    console.log(newData);
+    // filter data in JSON
+    const formattedData = {
+      'cityName': newData.geonames[0].name,
+      'country': newData.geonames[0].countryName,
+      'longitude': newData.geonames[0].lng,
+      'latitude': newData.geonames[0].lat,
+      'countryCode': newData.geonames[0].countryCode
+    }
+    console.log(":::::::: Formatted Data :::::::::::");
+    console.log(formattedData);
+    return formattedData;
+  } catch (error) {
+    // console.log("error", error);
+    return null;
+  }
 }
 
 function logData() {
@@ -50,17 +125,4 @@ function logData() {
   })
 }
 
-// Post Route
-app.post("/all", postData);
-
-function postData(req, res) {
-  const newData = req.body;
-  const newEntry = {
-    temperature: newData.temperature,
-    date: newData.date,
-    userResponse: newData.userResponse
-  }
-  projectData.push(newEntry);
-  console.log('data successfully added' +
-    '{ temperature: ' + newData.temperature + ', date: ' + newData.date + ', userResponse: ' + newData.userResponse + ' }');
-}
+// module.exports = getData;
