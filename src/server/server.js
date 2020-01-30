@@ -43,8 +43,20 @@ const pixabayKey = process.env.PIXABAY_KEY
 
 app.get('/', function (req, res) {
   console.log('I am listening')
-  res.send('Hello Man I am alive')
+  res.send('dist/index.html')
 })
+
+// Response format
+let expectedResponse = {
+  'imgUrl': '',
+  'destination': 'city,' + 'country',
+  'date': '',
+  'weather': {
+    'high': 0,
+    'low': 0,
+    'summary': ''
+  }
+}
 
 // Initialize trip route with a callback function
 app.post('/trip', (req, res) => {
@@ -59,31 +71,17 @@ app.post('/trip', (req, res) => {
   const geoNamesResult = getGeonamesData(inputData);
   console.log(":::::::: Geonames API Call Result :::::::::::");
   console.log(geoNamesResult);
-  
-  // // Call Darksky API
-  // const darkskyResult = getDarkskyData(geoNamesResult, inputData)
-  // console.log(":::::::: Darksky API Call Result :::::::::::");
-  // console.log(darkskyResult);
-  
-  // TODO: Call Pixabay API
-  
-  // TODO: Return response
-  // Response format
-  // const expectedResponse = {
-  //   'img_url': '',
-  //   'destination': 'city,' + 'country',
-  //   'date': userDate,
-  //   'weather': {
-  //     'high': 23,
-  //     'low': 12,
-  //     'summary': 'mostly clody'
-  //   }
-  // }
+
+  // Return response
+  res.send(expectedResponse);
 });
 
+function populateExpectedResponse(inputData) {
+  
+}
 
 /* Function to GET latitude, longitude and country data from genomes API */
-const getGeonamesData = async function (inputData) {
+function getGeonamesData(inputData) {
   const completeUrl = 'http://api.geonames.org/searchJSON?name_startsWith=' + inputData.destination + '&maxRows=1&username=' + geonamesUsername;
   const res = await fetch(completeUrl);
   try {
@@ -101,6 +99,10 @@ const getGeonamesData = async function (inputData) {
     console.log(":::::::: Formatted Data :::::::::::");
     console.log(formattedData);
 
+    // Update response
+    expectedResponse.date = inputData.date;
+    expectedResponse.destination = formattedData.cityName + ", " + formattedData.country;
+
     // Call Darksky API
     const darkskyResult = getDarkskyData(formattedData, inputData)
     console.log(":::::::: Darksky API Call Result :::::::::::");
@@ -114,7 +116,7 @@ const getGeonamesData = async function (inputData) {
 }
 
 /* Function to GET weather {high, low, summary} data from Darksky API */
-const getDarkskyData = async function (geonamesResult, inputData) {
+function getDarkskyData (geonamesResult, inputData) {
   const splitDate = inputData.date.split('/');
   const day = splitDate[0];
   const month = splitDate[1];
@@ -150,6 +152,17 @@ const getDarkskyData = async function (geonamesResult, inputData) {
     }
     console.log(":::::::: Formatted Data :::::::::::");
     console.log(formattedData);
+
+    // Update response
+    expectedResponse.weather.high = formattedData.high;
+    expectedResponse.weather.low = formattedData.low;
+    expectedResponse.weather.summary = formattedData.summary;
+
+    // Call Pixabay API
+    const pixabayResult = getPixabayData(geonamesResult)
+    console.log(":::::::: Pixabay API Call Result :::::::::::");
+    console.log(pixabayResult);
+
     return formattedData;
   } catch (error) {
     console.log("error", error);
@@ -157,5 +170,33 @@ const getDarkskyData = async function (geonamesResult, inputData) {
   }
 }
 
+/* Function to GET image url from pixabay API */
+function getPixabayData(geonamesResult) {
+  const completeUrl = 'https://pixabay.com/api/?key=' + pixabayKey + '&q=' + geonamesResult.cityName + ',' + geonamesResult.country + '&image_type=photo&per_page=3';
+  const res = await fetch(completeUrl);
+  try {
+    const newData = await res.json();
+    console.log(":::::::: Received Data from Pixabay API :::::::::::");
+    console.log(newData);
+    // filter data in JSON
+    const formattedData = {
+      'imageUrl': newData.hits[0].webformatURL
+    }
+
+    if (formattedData.imageUrl == '' || formattedData.imageUrl == null) {
+      formattedData.imageUrl = 'https://via.placeholder.com/728x90.png?text=' + geonamesResult.cityName + ',' + geonamesResult.country;
+    }
+    console.log(":::::::: Formatted Data :::::::::::");
+    console.log(formattedData);
+
+    // Update response
+    expectedResponse.imageUrl = formattedData.imageUrl;
+
+    return formattedData;
+  } catch (error) {
+    console.log("error", error);
+    return null;
+  }
+}
 
 // module.exports = getData;

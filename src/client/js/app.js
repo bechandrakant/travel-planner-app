@@ -24,7 +24,7 @@ function handleSubmit(event) {
       })
       // Update DOM with results
       .then((data) => {
-          updateUI()
+          updateUI(data)
       })
   }
 }
@@ -37,8 +37,13 @@ function getFormData() {
   return data;
 }
 
-function updateUI() {
-
+function updateUI(data) {
+  document.getElementById("location-image").src = data.imgUrl
+  document.getElementById("location").innerHTML = data.destination
+  document.getElementById("date").innerHTML = data.date
+  document.getElementById("high-temp").innerHTML = data.weather.high
+  document.getElementById("low-temp").innerHTML = data.weather.low
+  document.getElementById("weather-summary").innerHTML = data.weather.summary
 }
 
 export { handleSubmit }
