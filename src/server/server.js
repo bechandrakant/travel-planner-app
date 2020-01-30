@@ -46,20 +46,8 @@ app.get('/', function (req, res) {
   res.send('dist/index.html')
 })
 
-// Response format
-let expectedResponse = {
-  'imgUrl': '',
-  'destination': 'city,' + 'country',
-  'date': '',
-  'weather': {
-    'high': 0,
-    'low': 0,
-    'summary': ''
-  }
-}
-
 // Initialize trip route with a callback function
-app.post('/trip', (req, res) => {
+app.post('/trip', async function (req, res) {
   console.log(':::::::::: Data reached backend ::::::::')
   const inputData = {
     'destination': req.body.destination,
@@ -67,21 +55,51 @@ app.post('/trip', (req, res) => {
   }
   console.log(inputData)
 
-  // Call Geonames API
-  const geoNamesResult = getGeonamesData(inputData);
-  console.log(":::::::: Geonames API Call Result :::::::::::");
-  console.log(geoNamesResult);
+  const response = await makeApiCalls(inputData)
 
+  console.log("::::::::: Result :::::::" + response);
   // Return response
-  res.send(expectedResponse);
+  res.send(response);
 });
 
-function populateExpectedResponse(inputData) {
-  
+const makeApiCalls = async function(inputData) {
+  // Call APIs
+  try {
+    const geonamesResult = await getGeonamesData(inputData);
+    console.log(":::::::: API Call Results :::::::::::");
+    console.log(geonamesResult);
+
+    const darkskyResult = await getDarkskyData(geonamesResult, inputData);
+    console.log(":::::::: API Call Results :::::::::::");
+    console.log(darkskyResult);
+
+    const pixabayResult = await getPixabayData(geonamesResult);
+    console.log(":::::::: API Call Results :::::::::::");
+    console.log(pixabayResult);
+
+    // Response format
+    let expectedResponse = {
+      'imgUrl': pixabayResult.imageUrl,
+      'destination': geonamesResult.cityName + ', ' + geonamesResult.country,
+      'date': inputData.date,
+      'weather': {
+        'high': darkskyResult.high,
+        'low': darkskyResult.low,
+        'summary': darkskyResult.summary
+      }
+    }
+
+    console.log(":::::::::::::: Expected response ::::::::")
+    console.log(expectedResponse)
+    return expectedResponse;
+  } catch (error) {
+    console.log("error", error);
+    return null;
+  }
 }
 
 /* Function to GET latitude, longitude and country data from genomes API */
-function getGeonamesData(inputData) {
+const getGeonamesData = async function (inputData) {
   const completeUrl = 'http://api.geonames.org/searchJSON?name_startsWith=' + inputData.destination + '&maxRows=1&username=' + geonamesUsername;
   const res = await fetch(completeUrl);
   try {
@@ -99,15 +117,6 @@ function getGeonamesData(inputData) {
     console.log(":::::::: Formatted Data :::::::::::");
     console.log(formattedData);
 
-    // Update response
-    expectedResponse.date = inputData.date;
-    expectedResponse.destination = formattedData.cityName + ", " + formattedData.country;
-
-    // Call Darksky API
-    const darkskyResult = getDarkskyData(formattedData, inputData)
-    console.log(":::::::: Darksky API Call Result :::::::::::");
-    console.log(darkskyResult);
-
     return formattedData;
   } catch (error) {
     console.log("error", error);
@@ -116,7 +125,7 @@ function getGeonamesData(inputData) {
 }
 
 /* Function to GET weather {high, low, summary} data from Darksky API */
-function getDarkskyData (geonamesResult, inputData) {
+const getDarkskyData = async function (geonamesResult, inputData) {
   const splitDate = inputData.date.split('/');
   const day = splitDate[0];
   const month = splitDate[1];
@@ -153,16 +162,6 @@ function getDarkskyData (geonamesResult, inputData) {
     console.log(":::::::: Formatted Data :::::::::::");
     console.log(formattedData);
 
-    // Update response
-    expectedResponse.weather.high = formattedData.high;
-    expectedResponse.weather.low = formattedData.low;
-    expectedResponse.weather.summary = formattedData.summary;
-
-    // Call Pixabay API
-    const pixabayResult = getPixabayData(geonamesResult)
-    console.log(":::::::: Pixabay API Call Result :::::::::::");
-    console.log(pixabayResult);
-
     return formattedData;
   } catch (error) {
     console.log("error", error);
@@ -170,8 +169,8 @@ function getDarkskyData (geonamesResult, inputData) {
   }
 }
 
-/* Function to GET image url from pixabay API */
-function getPixabayData(geonamesResult) {
+/* Function to GET latitude, longitude and country data from genomes API */
+const getPixabayData = async function (geonamesResult) {
   const completeUrl = 'https://pixabay.com/api/?key=' + pixabayKey + '&q=' + geonamesResult.cityName + ',' + geonamesResult.country + '&image_type=photo&per_page=3';
   const res = await fetch(completeUrl);
   try {
@@ -188,9 +187,6 @@ function getPixabayData(geonamesResult) {
     }
     console.log(":::::::: Formatted Data :::::::::::");
     console.log(formattedData);
-
-    // Update response
-    expectedResponse.imageUrl = formattedData.imageUrl;
 
     return formattedData;
   } catch (error) {
