@@ -5,15 +5,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Weather Journal App</title>
-  <link rel="stylesheet" href="./../styles/styles.css">
+  <title>Travel Planner App</title>
 </head>
 
 <body>
   <header>
-    <nav>
-      <h1>Travel Planner App</h1>
-    </nav>
+    <h1>Travel Planner App</h1>
   </header>
   <main>
     <section class="user-input">
@@ -25,9 +22,9 @@
         <input type="submit" name="" id="submit" value="submit" onclick="return Client.handleSubmit(event)" onsubmit="return Client.handleSubmit(event)">
       </form>
     </section>
-    <section class="trip-details">
-      <div>
-        <img src="" alt="" id="location-image" />
+    <section id="trip-details">
+      <div id="image-container">
+        <img src="https://cdn.pixabay.com/photo/2020/01/21/11/52/fort-4782737__340.jpg" alt="" id="location-image" />
       </div>
       <div id="trip-data">
         <h2>My trip to: <span id="location"></span></h2>
@@ -38,17 +35,9 @@
           <br /><span id="weather-summary"></span>
         </p>
       </div>
-      <div class="todo-list">
-        <input type="text" id="todo" placeholder="things to do..." />
-        <input type="submit" value="add" id="add-todo" />
-        <ul id="todo-items"></ul>
-      </div>
+      <button id="remove-trip" onclick="return Client.removeTrip(event)">Remove Trip</button>
     </section>
   </main>
-
-  <footer>
-    Developed with &hearts; by Chandrakant!
-  </footer>
 
   <!-- Register Serviceworker -->
   <script>

@@ -1,17 +1,91 @@
 * {
-  margin: 10px;
-  padding: 10px;
+  margin: 0px;
+  padding: 0px;
+  box-sizing: border-box;
 }
 
 body {
   display: flex;
   flex-direction: column;
-}
 
-#entryHolder {
-  background-color: antiquewhite;
-  width: 400px;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
+  header {
+    background-color: orange;
+    color: white;
+    padding: 10px;
+    font-weight: 100;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-style: italic;
+  }
+
+  main {
+    flex: 1;
+    display: flex;
+
+    @media (max-width: 500px) {
+      flex-direction: column;
+    }
+
+    .user-input {
+      background-color: #f6c77b;
+      padding: 10px;
+      font-size: 1.5rem;
+
+      @media (max-width: 500px) {
+        flex: 1;
+      }
+
+      input {
+        display: block;
+        margin: 10px 0;
+        height: 1.5rem;
+        width: 200px;
+      }
+      
+      #submit {
+         background-color: green;
+         text-transform: uppercase;
+         padding: 10px;
+         border-radius: 6px;
+         height: 36px;
+         color: white;
+
+         &:hover {
+           background-color: blue;
+         }
+      }
+    }
+
+    #trip-details {
+      flex: 1;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+
+      #image-container {
+        padding: 10px;
+
+        #location-image {
+          max-width: 300px;
+        }
+      }
+
+      #trip-data {
+        min-width: 300px;
+        padding: 10px;
+        background-color: #eeffee;
+      }
+
+      button {
+        background-color: red;
+        color: white;
+        padding: 5px;
+        border: 1px solid red;
+        border-radius: 3px;
+
+        &:hover {
+          background-color: brown;
+        }
+      }
+    }
+  }
 }
