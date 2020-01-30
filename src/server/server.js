@@ -37,22 +37,18 @@ function callback() {
 }
 
 // API credentials
-const geonamesUsername = process.env.GEONAMES_USERNAME
-const darkskyKey = process.env.DARKSKY_KEY
-const pixabayKey = process.env.PIXABAY_KEY
+let geonamesUsername = process.env.GEONAMES_USERNAME
+let darkskyKey = process.env.DARKSKY_KEY
+let pixabayKey = process.env.PIXABAY_KEY
 
 app.get('/', function (req, res) {
   console.log('I am listening')
   res.send('dist/index.html')
 })
 
-// Initialize trip route with a callback function
 app.post('/trip', async function (req, res) {
   console.log(':::::::::: Data reached backend ::::::::')
-  const inputData = {
-    'destination': req.body.destination,
-    'date': req.body.date
-  }
+  const inputData = makeJson(req) 
   console.log(inputData)
 
   const response = await makeApiCalls(inputData)
@@ -61,6 +57,13 @@ app.post('/trip', async function (req, res) {
   // Return response
   res.send(response);
 });
+
+function makeJson(req) {
+  return {
+    'destination': req.body.destination,
+    'date': req.body.date
+  }
+}
 
 const makeApiCalls = async function(inputData) {
   // Call APIs
@@ -194,5 +197,3 @@ const getPixabayData = async function (geonamesResult) {
     return null;
   }
 }
-
-// module.exports = getData;
