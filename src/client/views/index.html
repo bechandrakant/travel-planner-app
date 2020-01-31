@@ -24,18 +24,18 @@
     </section>
     <section id="trip-details">
       <div id="image-container">
-        <img src="https://cdn.pixabay.com/photo/2020/01/21/11/52/fort-4782737__340.jpg" alt="" id="location-image" />
+        <img src="" alt="" id="location-image" />
       </div>
       <div id="trip-data">
         <h2>My trip to: <span id="location"></span></h2>
         <h2>Departure: <span id="date"></span></h2>
+        <button id="remove-trip" onclick="return Client.removeTrip(event)">Remove Trip</button>
         <p>
           Typical weather for then is: <br />
           High: <span id="high-temp"></span>, Low: <span id="low-temp"></span>
           <br /><span id="weather-summary"></span>
         </p>
       </div>
-      <button id="remove-trip" onclick="return Client.removeTrip(event)">Remove Trip</button>
     </section>
   </main>
 

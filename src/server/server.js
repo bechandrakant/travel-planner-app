@@ -42,7 +42,6 @@ let darkskyKey = process.env.DARKSKY_KEY
 let pixabayKey = process.env.PIXABAY_KEY
 
 app.get('/', function (req, res) {
-  console.log('I am listening')
   res.send('dist/index.html')
 })
 

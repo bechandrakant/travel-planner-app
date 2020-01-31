@@ -60,6 +60,7 @@ body {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
+      visibility: hidden;
 
       #image-container {
         padding: 10px;
