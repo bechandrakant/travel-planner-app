@@ -5,9 +5,6 @@ App fetches data from Geonames, Darksky and Pixabay API based on city and date o
 
 Fork this repo, then clone the branch of your choice from your forked repo down to your computer:
 
-```
-git clone -- git@github.com:[your-user-name]/webpack-express.git --
-```
 
 `cd` into your new folder and run:
 - ```npm install```
